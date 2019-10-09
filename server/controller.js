@@ -2,16 +2,40 @@ const pool = require('../database/database');
 //import uuid to generate unique ids for each user which, in createUser, we will pass into postgres
 const uuid = require('uuidv4').default;
 const fetch = require('node-fetch');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+const myPlaintextPassword = 's0/\/\P4$$w0rD';
+const someOtherPlaintextPassword = 'not_bacon';
 
 module.exports = {
+  encryptPassword: (req, res, next) => {
+    console.log("req body:", req.body);
+    console.log('in encryptPassword!');
+
+    bcrypt.genSalt(saltRounds, (err, salt) => {
+      if (err) {
+        console.log("error: salt not generated", err.stack);
+      } else {
+        bcrypt.hash(req.body.password, salt, (err, hash) => {
+          console.log("MY HASH ", hash);
+          res.locals.hashWord = hash;
+          next();
+        })
+      }
+    })
+
+    // next();
+  },
+
   createUser: (req, res, next) => {
     console.log("req body:", req.body);
     console.log("in signup!");
+    console.log("typeof hash?? ", typeof res.locals.hashWord);
 
-    if (typeof req.body.username === 'string' && typeof req.body.password === 'string') {
+    if (typeof req.body.username === 'string' && typeof res.locals.hashWord === 'string') {
       const uniqueID = uuid();
       const text = 'INSERT INTO users(name, password, uniqueID) VALUES ($1, $2, $3) RETURNING *';
-      const values = [req.body.username, req.body.password, uniqueID];
+      const values = [req.body.username, res.locals.hashWord, uniqueID];
 
       //create new user with username: req.body.username and password: req.body.password
       pool.query(text, values, (err, res) => {
@@ -36,32 +60,55 @@ module.exports = {
 
     console.log('req body:', req.body);
     console.log("in verify!");
-    const username = req.body.username;
-    const password = req.body.password;
+    const { username, password } = req.body;
+    // const password = res.locals.hashWord; // this will not work in login, we don't have access to this variable in the middleware chain.
 
-    //query database to see if user exists
-    const text = 'SELECT * FROM users WHERE name = $1 AND password = $2';
-    const values = [username, password];
-    let error = false;
+    const compareText = 'SELECT * FROM users WHERE name = $1';
+    const compareValues = [username];
 
-    pool.query(text, values, (err, success) => {
+    pool.query(compareText, compareValues, (err, success) => {
       if (err) {
-        console.log("error: bad query in verifyUser:", err.stack);
-        error = true;
+        console.log("error: no user found in comparetext/verifyuser", err.stack);
       } else {
-        console.log("success in validation:", success.rows[0].uniqueid);
-        res.locals.uniqueid = success.rows[0].uniqueid;
-        // console.log("res locals in veryify", res.locals);
-        if (success.rows.length === 0) {
-          console.log("error: username and/or password does not exist!");
-          error = true;
-        }
-      }
-      console.log("error is", error);
-      if (error === false) {
-        next();
+        console.log("compare success object: ", success.rows[0].password);
+        let hash = success.rows[0].password;
+        bcrypt.compare(password, hash, (err, res) => {
+          if (err) {
+            console.log("error in bcrypt compare,", err.stack);
+          } else {
+            console.log("bcrypt compare", res);
+          }
+        })
+        //next
+
+
+        //query database to see if user exists
+        const text = 'SELECT * FROM users WHERE name = $1 AND password = $2';
+        const values = [username, hash];
+        let error = false;
+
+        pool.query(text, values, (err, success) => {
+          if (err) {
+            console.log("error: bad query in verifyUser:", err.stack);
+            error = true;
+          } else {
+            console.log("success in validation:", success.rows[0].uniqueid);
+            res.locals.uniqueid = success.rows[0].uniqueid;
+            // console.log("res locals in veryify", res.locals);
+            if (success.rows.length === 0) {
+              console.log("error: username and/or password does not exist!");
+              error = true;
+            }
+          }
+          console.log("error is", error);
+          if (error === false) {
+            next();
+          }
+        })
+
       }
     })
+
     // next();
   }, //end of verify user
 

@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true })); // automatically transforms inc
 
 app.use('/build', express.static(path.join(__dirname, '../build'))); //static serve files in bundle.js or whatever is in build folder. this is what actually "connects" our backend to react.
 
-app.post('/signup', controller.createUser, controller.verifyUser, controller.setSSIDcookie, controller.generateWorkouts, (req, res) => {
+app.post('/signup', controller.encryptPassword, controller.createUser, controller.verifyUser, controller.setSSIDcookie, controller.generateWorkouts, (req, res) => {
   console.log('signup reques sent.');
   res.redirect('/workouts');
 })
