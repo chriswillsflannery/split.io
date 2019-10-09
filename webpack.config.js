@@ -1,11 +1,15 @@
 const path = require('path');
 
 module.exports = {
-  entry: './client/index.js',
+  entry: {
+    'home': './client/index.js',
+    'workouts': './client/splash.js'
+  },
   mode: process.env.NODE_ENV,
   output: {
-    filename: 'bundle.js',
+    filename: '[name]bundle.js',
     path: path.resolve(__dirname, 'build'),
+    // chunkFileName: '[id].chunk.js'
   },
   devServer: {
     publicPath: path.resolve(__dirname, '/build/'),
@@ -13,7 +17,10 @@ module.exports = {
     port: 8080,
     proxy: {
       '/signup': 'http://localhost:3000', // any front end element which fetches from express needs to be rerouted. it will by default try to fetch to 8080.
-      '/login': 'http://localhost:3000' // any front end element which fetches from express needs to be rerouted. it will by default try to fetch to 8080.
+      '/login': 'http://localhost:3000', // any front end element which fetches from express needs to be rerouted. it will by default try to fetch to 8080.
+      '/myworkouts': 'http://localhost:3000',
+      '/workouts': 'http://localhost:3000',
+      '/newworkout': 'http://localhost:3000'
       // "*": "http://[::1]:3000"
     }
   },
