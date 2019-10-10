@@ -3,7 +3,8 @@ const cors = require('cors'); //enable cross site scripting
 const express = require("express");
 const app = express();
 const path = require('path');
-const controller = require(path.resolve(__dirname, './controller.js'));
+const { encryptPassword, createUser, verifyUser, setSSIDcookie, generateWorkouts, randomizeWorkout, testCookie } = require('./controller.js');
+const { translateWorkout } = require('./translationController.js');
 
 app.use(cors()); // add the cors http header to every request by default - makes all routes accessible for all domains.
 
@@ -14,23 +15,23 @@ app.use(express.urlencoded({ extended: true })); // automatically transforms inc
 
 app.use('/build', express.static(path.join(__dirname, '../build'))); //static serve files in bundle.js or whatever is in build folder. this is what actually "connects" our backend to react.
 
-app.post('/signup', controller.encryptPassword, controller.createUser, controller.verifyUser, controller.setSSIDcookie, controller.generateWorkouts, (req, res) => {
+app.post('/signup', encryptPassword, createUser, verifyUser, setSSIDcookie, generateWorkouts, (req, res) => {
   console.log('signup reques sent.');
   res.redirect('/workouts');
 })
 
-app.post('/login', controller.verifyUser, controller.setSSIDcookie, controller.generateWorkouts, (req, res) => {
+app.post('/login', verifyUser, setSSIDcookie, generateWorkouts, (req, res) => {
   console.log("login request sent.");
   res.redirect('/workouts');
 })
 
-app.get('/newworkout', controller.randomizeWorkout, (req, res) => {
+app.get('/newworkout', randomizeWorkout, translateWorkout, (req, res) => {
   console.log("get request set to newworkout!");
   console.log('data sent back from dbase: ', res.locals.randomWorkout);
   res.send(res.locals.randomWorkout);
 })
 
-app.get('/', controller.testCookie, (req, res) => {
+app.get('/', testCookie, (req, res) => {
   console.log('serving');
   res.sendFile(path.join(__dirname, '../index.html'));
 })

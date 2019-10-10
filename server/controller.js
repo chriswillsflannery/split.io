@@ -174,7 +174,8 @@ module.exports = {
     console.log("in randomize workout");
     //retrieve random workout from workouts table
     //determine workouts table length
-    const text = 'SELECT workout, description FROM workouts OFFSET floor(random()*3) LIMIT 1';
+
+    const text = 'SELECT workout, description FROM workouts OFFSET floor(random()*20) LIMIT 1';
 
     pool.query(text, (err, success) => {
       if (err) {
@@ -187,6 +188,10 @@ module.exports = {
         next();
       }
     })
-  }
+  },
 
+  // translateWorkout: (req, res, next) => {
+  //   console.log("randomWorkout from randomize:", res.locals.randomWorkout);
+  //   next();
+  // }
 }
