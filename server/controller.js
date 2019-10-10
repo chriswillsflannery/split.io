@@ -17,7 +17,7 @@ module.exports = {
         console.log("error: salt not generated", err.stack);
       } else {
         bcrypt.hash(req.body.password, salt, (err, hash) => {
-          console.log("MY HASH ", hash);
+
           res.locals.hashWord = hash;
           next();
         })
@@ -44,7 +44,7 @@ module.exports = {
           console.log("error: bad query in createUser", err.stack);
           error = true;
         } else {
-          console.log(res.rows[0]); // in other words, return our new user's username and password
+
         }
         if (error === false) {
           next();
@@ -70,13 +70,13 @@ module.exports = {
       if (err) {
         console.log("error: no user found in comparetext/verifyuser", err.stack);
       } else {
-        console.log("compare success object: ", success.rows[0].password);
+
         let hash = success.rows[0].password;
         bcrypt.compare(password, hash, (err, res) => {
           if (err) {
             console.log("error in bcrypt compare,", err.stack);
           } else {
-            console.log("bcrypt compare", res);
+
           }
         })
         //next
@@ -92,7 +92,7 @@ module.exports = {
             console.log("error: bad query in verifyUser:", err.stack);
             error = true;
           } else {
-            console.log("success in validation:", success.rows[0].uniqueid);
+
             res.locals.uniqueid = success.rows[0].uniqueid;
             // console.log("res locals in veryify", res.locals);
             if (success.rows.length === 0) {
@@ -160,7 +160,7 @@ module.exports = {
           if (err) {
             console.log("error inserting new workout into workouts: ", err.stack);
           } else {
-            console.log("successfully added new workout to db in generateWorkouts");
+
           }
         })
       })
@@ -245,7 +245,7 @@ module.exports = {
       if (err2) {
         console.log("error in userworkouts push,", err2.stack);
       } else {
-        console.log("successfully pushed userworkout in randomizeWorkout");
+
         next();
 
       }
@@ -257,8 +257,8 @@ module.exports = {
   grabExistingUserWorkouts: (req, res, next) => {
     //look in userworkouts table and pull out any workouts pertaining to that particular user
     //findMany based on the SSIDcookie currently in use
-    console.log("in grabexistinguser workout");
-    console.log("WHAT IS REQ COOKIE HERE?", req.headers.cookie);
+
+
 
     function getSSID(string) {
       //grab ssid substring
@@ -271,7 +271,7 @@ module.exports = {
       return newString;
     }
     const ssid = getSSID(req.headers.cookie);
-    console.log("mySSID is", ssid);
+
 
     res.locals.existingWorkouts = [];
     // res.locals.existingWorkouts.push("baked beans!");
@@ -283,8 +283,8 @@ module.exports = {
       if (err) {
         console.log('error: unable to find that user in userworkouts!', err.stack);
       } else {
-        console.log('successfully located user in userworkouts, grabexistingIUserWorkouts');
-        console.log("return item , ", success.rows);
+
+
         success.rows.forEach(row => {
           res.locals.existingWorkouts.push(row.workout);
         })

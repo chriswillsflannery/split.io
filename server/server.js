@@ -42,7 +42,7 @@ app.get('/workouts', (req, res) => {
 })
 
 app.get('/userworkouts', grabExistingUserWorkouts, (req, res) => {
-  console.log("get request sent to userworkouts!");
+
   //send data back to frontend
   res.send(res.locals.existingWorkouts);
 })
