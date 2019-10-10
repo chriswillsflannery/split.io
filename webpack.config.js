@@ -20,7 +20,8 @@ module.exports = {
       '/login': 'http://localhost:3000', // any front end element which fetches from express needs to be rerouted. it will by default try to fetch to 8080.
       '/myworkouts': 'http://localhost:3000',
       '/workouts': 'http://localhost:3000',
-      '/newworkout': 'http://localhost:3000'
+      '/newworkout': 'http://localhost:3000',
+      '/userworkouts': 'http://localhost:3000'
       // "*": "http://[::1]:3000"
     }
   },

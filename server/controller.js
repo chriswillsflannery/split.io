@@ -9,8 +9,8 @@ const someOtherPlaintextPassword = 'not_bacon';
 
 module.exports = {
   encryptPassword: (req, res, next) => {
-    console.log("req body:", req.body);
-    console.log('in encryptPassword!');
+    // console.log("req body:", req.body);
+    // console.log('in encryptPassword!');
 
     bcrypt.genSalt(saltRounds, (err, salt) => {
       if (err) {
@@ -28,9 +28,9 @@ module.exports = {
   },
 
   createUser: (req, res, next) => {
-    console.log("req body:", req.body);
-    console.log("in signup!");
-    console.log("typeof hash?? ", typeof res.locals.hashWord);
+    // console.log("req body:", req.body);
+    // console.log("in signup!");
+    // console.log("typeof hash?? ", typeof res.locals.hashWord);
 
     if (typeof req.body.username === 'string' && typeof res.locals.hashWord === 'string') {
       const uniqueID = uuid();
@@ -58,8 +58,8 @@ module.exports = {
   verifyUser: (req, res, next) => {
     //grab user id to pass through res.locals so we have access in setSSIDcookie
 
-    console.log('req body:', req.body);
-    console.log("in verify!");
+    // console.log('req body:', req.body);
+    // console.log("in verify!");
     const { username, password } = req.body;
     // const password = res.locals.hashWord; // this will not work in login, we don't have access to this variable in the middleware chain.
 
@@ -141,7 +141,7 @@ module.exports = {
   // }
 
   generateWorkouts: (req, res, next) => {
-    console.log("in generateWorkouts!");
+    // console.log("in generateWorkouts!");
 
     // pull in data from workouts api to populate table workouts
     fetch('https://wger.de/api/v2/exercise/')
@@ -171,9 +171,25 @@ module.exports = {
   },
 
   randomizeWorkout: (req, res, next) => {
-    console.log("in randomize workout");
-    //retrieve random workout from workouts table
-    //determine workouts table length
+    // console.log("in randomize workout");
+    // console.log("WHAT IS REQ COOKIE HERE?", req.headers.cookie);
+
+    function getSSID(string) {
+      //grab ssid substring
+      let newString = ''
+      for (let i = 0; i < string.length; i++) {
+        if (string[i] === 's' && string[i + 1] === 's' && string[i + 2] === 'i') {
+          newString = string.slice(i + 5);
+        }
+      }
+      return newString;
+    }
+    const ssid = getSSID(req.headers.cookie);
+
+    //check userworkouts database to see if there are any wokrouts pertaining to this user already
+
+
+
 
     const text = 'SELECT workout, description FROM workouts OFFSET floor(random()*20) LIMIT 1';
 
@@ -181,14 +197,102 @@ module.exports = {
       if (err) {
         console.log("error in randomizeWorkout ", err.stack)
       } else {
-        console.log("success in randomizeWorkout!", success.rows);
+        // console.log("success in randomizeWorkout!", success.rows);
         res.locals.randomWorkout = [];
         res.locals.randomWorkout.push(success.rows[0].workout);
         res.locals.randomWorkout.push(success.rows[0].description);
+
+
+        // //here we also need to save this new random workout to the userworkouts database
+        // const userWorkoutText = 'INSERT INTO userworkouts(userid, workout) VALUES ($1, $2) RETURNING *';
+        // const userWorkoutValues = [ssid, success.rows[0].workout];
+
+        // pool.query(userWorkoutText, userWorkoutValues, (err2, success2) => {
+        //   if (err2) {
+        //     console.log("error in userworkouts push,", err2.stack);
+        //   } else {
+        //     console.log("successfully pushed userworkout in randomizeWorkout");
+
+        //   }
+        // })
         next();
+
       }
     })
   },
+
+  populateUserWorkouts: (req, res, next) => {
+    // console.log("in populateuser workout");
+    // console.log("WHAT IS REQ COOKIE in populateuserworkouts?", req.headers.cookie);
+
+    function getSSID(string) {
+      //grab ssid substring
+      let newString = ''
+      for (let i = 0; i < string.length; i++) {
+        if (string[i] === 's' && string[i + 1] === 's' && string[i + 2] === 'i') {
+          newString = string.slice(i + 5);
+        }
+      }
+      return newString;
+    }
+    const ssid = getSSID(req.headers.cookie);
+
+    //here we also need to save this new random workout to the userworkouts database
+    const userWorkoutText = 'INSERT INTO userworkouts(userid, workout) VALUES ($1, $2) RETURNING *';
+    const userWorkoutValues = [ssid, res.locals.randomWorkout[0]];
+
+    pool.query(userWorkoutText, userWorkoutValues, (err2, success2) => {
+      if (err2) {
+        console.log("error in userworkouts push,", err2.stack);
+      } else {
+        console.log("successfully pushed userworkout in randomizeWorkout");
+        next();
+
+      }
+    })
+
+
+  },
+
+  grabExistingUserWorkouts: (req, res, next) => {
+    //look in userworkouts table and pull out any workouts pertaining to that particular user
+    //findMany based on the SSIDcookie currently in use
+    console.log("in grabexistinguser workout");
+    console.log("WHAT IS REQ COOKIE HERE?", req.headers.cookie);
+
+    function getSSID(string) {
+      //grab ssid substring
+      let newString = ''
+      for (let i = 0; i < string.length; i++) {
+        if (string[i] === 's' && string[i + 1] === 's' && string[i + 2] === 'i') {
+          newString = string.slice(i + 5);
+        }
+      }
+      return newString;
+    }
+    const ssid = getSSID(req.headers.cookie);
+    console.log("mySSID is", ssid);
+
+    res.locals.existingWorkouts = [];
+    // res.locals.existingWorkouts.push("baked beans!");
+
+    const text = 'SELECT userid, workout FROM userworkouts WHERE userid = $1';
+    const values = [ssid];
+
+    pool.query(text, values, (err, success) => {
+      if (err) {
+        console.log('error: unable to find that user in userworkouts!', err.stack);
+      } else {
+        console.log('successfully located user in userworkouts, grabexistingIUserWorkouts');
+        console.log("return item , ", success.rows);
+        success.rows.forEach(row => {
+          res.locals.existingWorkouts.push(row.workout);
+        })
+        next();
+      }
+    })
+
+  }
 
   // translateWorkout: (req, res, next) => {
   //   console.log("randomWorkout from randomize:", res.locals.randomWorkout);
