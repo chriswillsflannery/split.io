@@ -5,8 +5,11 @@ import App from './components/App';
 // import routes from './routes';
 
 //  import styles from './scss/application.scss';
+const reactime = require('reactime');
 
 
 
 ReactDOM.render(<App />, document.getElementById('root'));
 // ReactDOM.render(<Router history={BrowserRouter} routes={routes} />, document.querySelector('#root'));
+
+reactime(document.getElementById('root'));
