@@ -1,17 +1,44 @@
 import React from 'react';
 // import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import Background from '../../images/background.jpg';
+import Background from '../../build/images/background.jpg';
+import Overlay from '../../build/images/overlay.png';
 
-const sectionStyle = {
-  width: "100%",
-  height: "400px",
-  backgroundImage: `url(${Background})`
+const overlayStyle = {
+  backgroundImage: `url(${Overlay})`,
+  width: `100%`,
+  height: `500px`,
+  backgroundAttachment: `fixed`,
+  backgroundSize: `cover`,
+  backgroundRepeat: `no-repeat`,
+  zIndex: `3`,
+  marginTop: `-450`
+}
+
+const navStyle = {
+  width: `100%`,
+  height: `50px`,
+  position: `fixed`,
+  top: `0`,
+  backgroundColor: `whitesmoke`,
+  zIndex: `-1`,
+}
+
+const bgStyle = {
+  backgroundImage: `url(${Background})`,
+  width: `100%`,
+  height: `500px`,
+  backgroundAttachment: `fixed`,
+  backgroundSize: `cover`,
+  backgroundRepeat: `no-repeat`,
+  zIndex: `1`
 }
 
 const App = () => {
   return (
     <>
-      <section style={sectionStyle} />
+      <section style={navStyle} />
+      <section style={overlayStyle} />
+      <section style={bgStyle} />
       <div>
         <h1>log in:</h1>
         <form method="POST" action='/login'>

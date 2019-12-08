@@ -34,6 +34,7 @@
     "react-router-dom": "^5.1.2",
     "reactime": "^2.0.7",
     "translate": "^1.1.0",
+    "url-loader": "^3.0.0",
     "uuidv4": "^5.0.1",
     "webpack": "^4.41.0",
     "webpack-dev-server": "^3.8.2"

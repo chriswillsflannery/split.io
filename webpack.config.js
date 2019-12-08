@@ -22,7 +22,7 @@ module.exports = {
       '/workouts': 'http://localhost:3000',
       '/newworkout': 'http://localhost:3000',
       '/userworkouts': 'http://localhost:3000',
-      '/4721e926e0ed366765e05823b3bf1dd1.jpg': 'http://localhost:3000'
+      '/build/images': 'http://localhost:3000'
       // "*": "http://[::1]:3000"
     }
   },
@@ -40,10 +40,8 @@ module.exports = {
       },
       {
         test: /\.(png|svg|jpg|gif)$/,
-        use: [
-          'file-loader',
-        ],
-      },
+        loader: 'url-loader'
+      }
       // {
       //   test: /\.s[ac]ss$/i,
       //   use: [
